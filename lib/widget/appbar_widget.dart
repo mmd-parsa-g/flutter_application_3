@@ -25,7 +25,16 @@ class AppbarWidget extends AppBar {
                       }
 
                       if (isRefreshing) {
-                        return const CircularProgressIndicator();
+                        return const Padding(
+                          padding:  EdgeInsets.all(11.0),
+                          child:  SizedBox(
+                            width: 15,
+                            height: 15,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 3,
+                            ),
+                          ),
+                        );
                       }
 
                       return IconButton(

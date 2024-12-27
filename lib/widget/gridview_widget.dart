@@ -13,10 +13,10 @@ class GridViewWidget extends StatelessWidget {
       selector: (state) {
         return (state as FetchDataLoadSuccess)
             .dataList
-            .where((e) => e.isPin)
+            .where((element) => element.isPin)
             .toList();
       },
-      builder: (context, list) {
+      builder: (context, listIsPin) {
         return GridView.builder(
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
@@ -24,9 +24,9 @@ class GridViewWidget extends StatelessWidget {
             crossAxisSpacing: 8,
             childAspectRatio: 1.5,
           ),
-          itemCount: list.length,
+          itemCount: listIsPin.length,
           itemBuilder: (context, index) {
-            final item = list[index];
+            final itemList = listIsPin[index];
 
             return Container(
               decoration: BoxDecoration(
@@ -36,18 +36,52 @@ class GridViewWidget extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  Text(
-                    item.idName,
-                    style: const TextStyle(
-                        fontSize: 30, fontWeight: FontWeight.w600),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(4.0),
+                        child: Image.network(
+                          'https://static.sarrafex.com/${itemList.iconUrl}',
+                          width: 40,
+                          height: 40,
+                        ),
+                      ),
+                      Text(
+                        itemList.pair,
+                        style: const TextStyle(
+                            fontSize: 25, fontWeight: FontWeight.w600),
+                      ),
+                    ],
                   ),
                   Column(
                     children: [
-                      Text(
-                        NumberFormat.currency(symbol: "\$", decimalDigits: 5)
-                            .format(item.price),
-                        style: const TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.w400),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              NumberFormat.currency(
+                                      symbol: "\$",
+                                      decimalDigits: itemList.baseAssetDecimals)
+                                  .format(itemList.latestRate),
+                              style: const TextStyle(
+                                  fontSize: 20, fontWeight: FontWeight.w400),
+                            ),
+                          ),
+                          itemList.yesterdayPriceChangePercent > 0
+                              ? Text(
+                                  "+${itemList.yesterdayPriceChangePercent}%",
+                                  style: const TextStyle(
+                                      color: Colors.green, fontSize: 14),
+                                )
+                              : Text(
+                                  "${itemList.yesterdayPriceChangePercent}%",
+                                  style: const TextStyle(
+                                      color: Colors.red, fontSize: 14),
+                                )
+                        ],
                       ),
                     ],
                   ),
@@ -55,7 +89,7 @@ class GridViewWidget extends StatelessWidget {
                     onPressed: () {
                       context
                           .read<FetchDataBloc>()
-                          .add(FetchDataToggle(idName: item.idName));
+                          .add(FetchDataToggle(pairName: itemList.pair));
                     },
                     label: const Text("Remove"),
                     icon: const Icon(

@@ -13,12 +13,12 @@ class FetchDataLoaded extends FetchDataEvent {
 }
 
 class FetchDataToggle extends FetchDataEvent {
-  final String idName;
+  final String pairName;
 
-  const FetchDataToggle({required this.idName});
+  const FetchDataToggle({required this.pairName});
 
   @override
-  List<Object> get props => [idName];
+  List<Object> get props => [pairName];
 }
 
 class FetchDataRefreshed extends FetchDataEvent {}

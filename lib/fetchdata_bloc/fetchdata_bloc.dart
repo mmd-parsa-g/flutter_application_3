@@ -14,12 +14,12 @@ class FetchDataBloc extends Bloc<FetchDataEvent, FetchDataState> {
 
       try {
         final data = await _repositoryData.fetchData();
-        final sp = await SharedPreferences.getInstance();
-        final pinIds = sp.getStringList('pin_list') ?? [];
+        final sharedPreferences = await SharedPreferences.getInstance();
+        final pinIds = sharedPreferences.getStringList('pin_list') ?? [];
 
-        final list = data.map((e) {
-          return e.copyWith(
-            isPin: pinIds.contains(e.idName),
+        final list = data.map((element) {
+          return element.copyWith(
+            isPin: pinIds.contains(element.pair),
           );
         });
 
@@ -35,16 +35,16 @@ class FetchDataBloc extends Bloc<FetchDataEvent, FetchDataState> {
           return;
         } else if (state is FetchDataLoadSuccess) {
           final state = [
-            for (final a in pinState.dataList)
-              if (a.idName != event.idName) a else a.copyWith(isPin: !a.isPin)
+            for (final value in pinState.dataList)
+              if (value.pair != event.pairName) value else value.copyWith(isPin: !value.isPin)
           ];
 
           final pinnedIds = [
-            ...state.where((e) => e.isPin).map((e) => e.idName)
+            ...state.where((element) => element.isPin).map((element) => element.pair)
           ];
 
-          final sp = await SharedPreferences.getInstance();
-          sp.setStringList('pin_list', pinnedIds);
+          final sharedPreferences = await SharedPreferences.getInstance();
+          sharedPreferences.setStringList('pin_list', pinnedIds);
 
           emit(pinState.copyWith(dataList: state));
         }
@@ -61,12 +61,12 @@ class FetchDataBloc extends Bloc<FetchDataEvent, FetchDataState> {
 
         final data = await _repositoryData.fetchData();
 
-        final freshedItems = cachedItems.map((e) {
-          final newItem = data.firstWhere((i) {
-            return e.idName == i.idName;
-          }, orElse: () => e);
+        final freshedItems = cachedItems.map((element) {
+          final newItem = data.firstWhere((value) {
+            return element.pair == value.pair;
+          }, orElse: () => element);
 
-          return e.copyWith(price: newItem.price);
+          return element.copyWith(latestRate: newItem.latestRate);
         });
 
         emit(FetchDataLoadSuccess(

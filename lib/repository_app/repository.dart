@@ -4,20 +4,18 @@ import 'package:http/http.dart';
 
 class RepositoryData {
   Future<List<ReceiveData>> fetchData() async {
-    var response = await get(Uri.parse(
-        "https://api.nobitex.ir/market/stats?srcCurrency=btc&dstCurrency=rls"));
+    var response = await get(Uri(
+      
+      queryParameters: {"filter" : "baseAssetId eq 'USDT'" , "orderBy" : "order desc" },
+      scheme: 'https',
+      host: 'api.sarrafex.com',
+      path: 'exchanger/query/market'));
     if (response.statusCode == 200) {
-      final Map<String, dynamic> result =
-          jsonDecode(response.body)['global']['binance'];
+      final List result = jsonDecode(response.body)['value'];
 
-      return result.entries
-          .map((e) => ReceiveData(idName: e.key, price: e.value, isPin: false))
-          .toList()
-        ..sort((e1, e2) {
-          var a = e2.price.compareTo(e1.price);
-          if (a == 0) a = e2.idName.compareTo(e1.idName);
-          return a;
-        });
+      return result.map((e) => ReceiveData.fromJson(e)).toList();
+        
+        
     } else {
       throw Exception(response.reasonPhrase);
     }

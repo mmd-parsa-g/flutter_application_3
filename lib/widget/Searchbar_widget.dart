@@ -37,53 +37,70 @@ class _SearchbarWidgetState extends State<SearchbarWidget> {
         if (state is FetchDataLoadSuccess) {
           Iterable<Widget> getsaggestions(String query) {
             final lowerCase = query.toLowerCase();
-            return state.dataList.where((a) {
-              return a.idName.toLowerCase().contains(lowerCase);
-            }).map((a) {
-              return ListTile(
-                title: Text(a.idName),
-                subtitle: Text(
-                    (NumberFormat.currency(symbol: "\$", decimalDigits: 5)
-                        .format(a.price))),
-                trailing: Text(a.isPin == true ? "isPined!" : ""),
-                leading: IconButton(
+            return state.dataList.where((element) {
+              return element.pair.toLowerCase().contains(lowerCase);
+            }).map(
+              (element) {
+                return ListTile(
+                  title: Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(4.0),
+                        child: Image.network(
+                          "https://static.sarrafex.com/${element.iconUrl}",
+                          width: 30,
+                          height: 30,
+                        ),
+                      ),
+                      Text(
+                        element.pair,
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w500),
+                      ),
+                    ],
+                  ),
+                  subtitle: Row(
+                    children: [
+                      const SizedBox(
+                        width: 40,
+                      ),
+                      Text(
+                        (NumberFormat.currency(
+                                symbol: "\$",
+                                decimalDigits: element.baseAssetDecimals)
+                            .format(element.latestRate)),
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: element.yesterdayPriceChangePercent > 0
+                              ? Text(
+                                  "24h +${element.yesterdayPriceChangePercent}%",
+                                  style: const TextStyle(
+                                      color: Colors.green, fontSize: 12),
+                                )
+                              : Text(
+                                  "24h ${element.yesterdayPriceChangePercent}%",
+                                  style: const TextStyle(
+                                      color: Colors.red, fontSize: 12),
+                                ))
+                    ],
+                  ),
+                  trailing: Text(element.isPin == true ? "isPined!" : ""),
+                  leading: IconButton(
                     onPressed: () {
                       searchController.closeView(searchController.text);
                       context
                           .read<FetchDataBloc>()
-                          .add(FetchDataToggle(idName: a.idName));
+                          .add(FetchDataToggle(pairName: element.pair));
                     },
-                    icon: Icon(a.isPin == true ?  Icons.push_pin : Icons.push_pin_outlined)),
-                // leading: BlocSelector<FetchDataBloc, FetchDataState, bool>(
-                //   selector: (state) {
-                //     final length = (state as FetchDataLoadSuccess)
-                //         .dataList
-                //         .where((e) => e.isPin)
-                //         .length;
-                //     return length < 4;
-                //   },
-                //   builder: (context, canPinMore) {
-                //     if (canPinMore) {
-                //       return IconButton(
-                //           tooltip: "Pin To Main Screen",
-                //           onPressed: () {
-                //             searchController.closeView(searchController.text);
-                //             context
-                //                 .read<FetchDataBloc>()
-                //                 .add(FetchDataToggle(idName: a.idName));
-                //           },
-                //           icon: Icon(a.isPin == true
-                //               ? Icons.push_pin
-                //               : Icons.push_pin_outlined));
-                //     }
-
-                //     return const SizedBox(
-                //       width: 40,
-                //     );
-                //   },
-                // ),
-              );
-            });
+                    icon: Icon(element.isPin == true
+                        ? Icons.push_pin
+                        : Icons.push_pin_outlined),
+                  ),
+                );
+              },
+            );
           }
 
           return SearchAnchor.bar(
