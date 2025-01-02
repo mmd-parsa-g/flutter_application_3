@@ -17,7 +17,7 @@ class FetchDataBloc extends Bloc<FetchDataEvent, FetchDataState> {
         final sharedPreferences = await SharedPreferences.getInstance();
         final pinIds = sharedPreferences.getStringList('pin_list') ?? [];
 
-        final list = data.map((element) {
+        final list = data!.map((element) {
           return element.copyWith(
             isPin: pinIds.contains(element.pair),
           );
@@ -62,7 +62,7 @@ class FetchDataBloc extends Bloc<FetchDataEvent, FetchDataState> {
         final data = await _repositoryData.fetchData();
 
         final freshedItems = cachedItems.map((element) {
-          final newItem = data.firstWhere((value) {
+          final newItem = data!.firstWhere((value) {
             return element.pair == value.pair;
           }, orElse: () => element);
 
